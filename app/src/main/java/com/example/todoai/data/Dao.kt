@@ -18,3 +18,12 @@ interface ToDoDao {
     @Query("DELETE FROM todos WHERE id=:id")
     suspend fun delete(id: String)
 }
+
+@Dao
+interface SummaryDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(item: Summary)
+
+    @Query("SELECT * FROM summaries ORDER BY createdAt DESC LIMIT 50")
+    fun latest(): Flow<List<Summary>>
+}

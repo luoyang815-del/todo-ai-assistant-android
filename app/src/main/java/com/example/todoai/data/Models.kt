@@ -19,3 +19,11 @@ data class ToDo(
     val createdAt: Long = Instant.now().toEpochMilli(),
     val updatedAt: Long = Instant.now().toEpochMilli()
 )
+
+@Entity(tableName = "summaries")
+data class Summary(
+    @PrimaryKey val id: String,
+    val promptUsed: String,
+    val summaryMd: String,
+    val createdAt: Long = Instant.now().toEpochMilli()
+)

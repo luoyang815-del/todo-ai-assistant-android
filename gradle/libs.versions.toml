@@ -16,6 +16,7 @@ snakeYaml = "2.2"
 material3 = "1.3.0"
 appcompat = "1.7.0"
 accompanistPerms = "0.36.0"
+navigation = "2.8.3"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,6 +38,7 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 snake-yaml = { group = "org.yaml", name = "snakeyaml", version.ref = "snakeYaml" }
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanistPerms" }
+nav-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

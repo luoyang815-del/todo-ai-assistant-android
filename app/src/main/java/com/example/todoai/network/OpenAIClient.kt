@@ -31,18 +31,15 @@ class OpenAIClient(private val cfg: OpenAIConfig) {
             .readTimeout(cfg.timeoutSec, TimeUnit.SECONDS)
             .writeTimeout(cfg.timeoutSec, TimeUnit.SECONDS)
             .addInterceptor(Interceptor { chain ->
-                val orig = chain.request()
-                val rb = orig.newBuilder()
+                val rb = chain.request().newBuilder()
                     .header("Authorization", "Bearer ${cfg.apiKey}")
                     .header("Content-Type", "application/json")
-                cfg.gatewayBasic?.takeIf { it.isNotBlank() }?.let { basic ->
-                    rb.header("Proxy-Authorization", "Basic $basic")
+                cfg.gatewayBasic?.takeIf { it.isNotBlank() }?.let {
+                    rb.header("Proxy-Authorization", "Basic $it")
                 }
                 chain.proceed(rb.build())
             })
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BASIC
-            })
+            .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC })
 
         if (cfg.proxyType != "NONE" && cfg.proxyHost != null && cfg.proxyPort != null) {
             val type = when (cfg.proxyType) {
@@ -67,12 +64,11 @@ class OpenAIClient(private val cfg: OpenAIConfig) {
         try {
             val url = "${cfg.baseUrl.trimEnd('/')}/v1/chat/completions"
             val payload = "{"model":"${cfg.model}","messages":[{"role":"system","content":"你是执行助理，擅长GTD与周报总结。输出Markdown和简要清单。"},{"role":"user","content":${jsonPayload}}],"temperature":0.2}"
-            val body = payload.toRequestBody("application/json".toMediaType())
-            val req = Request.Builder().url(url).post(body).build()
+            val req = Request.Builder().url(url).post(payload.toRequestBody("application/json".toMediaType())).build()
             client.newCall(req).execute().use { resp ->
-                if (!resp.isSuccessful) return@withContext Result.failure(IllegalStateException("HTTP ${resp.code}"))
-                val text = resp.body?.string() ?: ""
-                return@withContext Result.success(text)
+                val body = resp.body?.string() ?: ""
+                if (!resp.isSuccessful) return@withContext Result.failure(IllegalStateException("HTTP ${resp.code}: $body"))
+                Result.success(body)
             }
         } catch (e: Exception) {
             Result.failure(e)

@@ -15,8 +15,8 @@ android {
         applicationId = "com.example.todoai"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0-m1"
+        versionCode = 2
+        versionName = "1.1.0-m2"
 
         vectorDrawables { useSupportLibrary = true }
     }
@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
+    implementation(libs.nav.compose)
 
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
