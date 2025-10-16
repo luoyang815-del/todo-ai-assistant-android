@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
 fun AppScreen(vm: AppViewModel) {
     var title by remember { mutableStateOf("") }
     Column(Modifier.padding(16.dp)) {
-        Text(text = "代办清单 + OpenAI 汇总（M1）", style = MaterialTheme.typography.titleLarge)
+        Text(text = "代办清单（M1）", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(12.dp))
         Row {
             OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("新增代办标题") }, modifier = Modifier.weight(1f))
@@ -50,8 +50,6 @@ fun AppScreen(vm: AppViewModel) {
         }
         Spacer(Modifier.height(12.dp))
         Row {
-            Button(onClick = { vm.summarizeNow() }) { Text("一键汇总到 OpenAI") }
-            Spacer(Modifier.width(8.dp))
             Button(onClick = { vm.writeTodayToSystemCalendar() }) { Text("写入系统日历") }
         }
         Spacer(Modifier.height(12.dp))

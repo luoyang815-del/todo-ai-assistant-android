@@ -9,8 +9,6 @@ import androidx.room.Room
 import com.example.todoai.data.AppDb
 import com.example.todoai.data.ToDo
 import com.example.todoai.calendar.CalendarHelper
-import com.example.todoai.network.OpenAIClient
-import com.example.todoai.network.OpenAIConfig
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -45,18 +43,6 @@ class AppViewModel(private val app: Application) : ViewModel() {
         val now = Instant.now().toEpochMilli()
         val end = now + 60 * 60 * 1000
         CalendarHelper.insertOrUpdateEvent(app, "今日代办（示例）", now, end, "由 Todo AI Assistant 写入", 1L, null)
-    }
-
-    fun summarizeNow() = viewModelScope.launch {
-        val cfg = OpenAIConfig(
-            baseUrl = "https://api.openai.com", // 可在设置中替换成你的网关地址
-            apiKey = "YOUR_KEY",
-            model = "gpt-4.1-mini"
-        )
-        val client = OpenAIClient(cfg)
-        val items = todos.value.take(5).joinToString(",") { "{"title":"" + it.title.replace(""","\"") + ""}" }
-        val payload = "{"todos":[" + items + "]}"
-        client.summarizeTodos(payload)
     }
 
     companion object {
