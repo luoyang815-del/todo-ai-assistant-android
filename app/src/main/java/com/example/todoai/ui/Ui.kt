@@ -40,7 +40,7 @@ class AppViewModel(private val app: Application) : ViewModel() {
     }
 
     fun writeTodayToSystemCalendar() = viewModelScope.launch {
-        val now = Instant.now().toEpochMilli()
+        val now = java.time.Instant.now().toEpochMilli()
         val end = now + 60 * 60 * 1000
         CalendarHelper.insertOrUpdateEvent(app, "今日代办（示例）", now, end, "由 Todo AI Assistant 写入", 1L, null)
     }

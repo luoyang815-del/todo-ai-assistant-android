@@ -1,11 +1,11 @@
 
-# TodoAIAssistant（M1 原型）
+# TodoAIAssistant（M1 全量修复版）
 
-**说明：中文内容，英文文件名** —— 按你的偏好设置。此仓库为 Android 首版，已内置系统日历写入与桌面小插件骨架。
+- 开启 AndroidX / Jetifier（gradle.properties）
+- Kotlin 2.0 + Compose：显式启用 Compose 编译器插件（kotlin-compose）
+- Compose 编译器版本：1.6.10（与 Kotlin 2.0 兼容）
+- CI：生成 Gradle Wrapper(8.7) 后用 `./gradlew` 构建
 
-## 本地构建
-- Android Studio 打开后直接运行。
-- CI（无 Gradle Wrapper）：GitHub Actions 中使用预装 Gradle 运行 `gradle :app:assembleDebug`。
-
-## 权限
-- 通知、读取/写入日历。首次启动会弹窗请求。
+## 用法
+- 本地：Android Studio 打开 → 直接运行。
+- CI：推到 GitHub，Actions 自动出 Debug APK。
