@@ -1,4 +1,3 @@
-
 [versions]
 agp = "8.5.2"
 kotlin = "2.0.21"
@@ -39,11 +38,6 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-    kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-
-
-# added for kapt
-[plugins]
-# (existing entries are above) — duplicate section not allowed; ensure we don't duplicate
+kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
