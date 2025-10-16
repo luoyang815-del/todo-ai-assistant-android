@@ -1,0 +1,8 @@
+
+<resources>
+    <string name="app_name">Todo AI Assistant</string>
+    <string name="widget_title">今日待办</string>
+    <string name="action_add">新增</string>
+    <string name="action_summarize">汇总</string>
+    <string name="permission_calendar_rationale">需要写入系统日历以创建/更新事件。</string>
+</resources>
