@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.kotlin.compose)   // Kotlin 2.0 需要显式启用 Compose 插件
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlinKapt)
 }
 
@@ -39,7 +39,6 @@ android {
     }
 
     composeOptions {
-        // 与 versions.toml 的 composeCompiler 对齐（如 1.6.10）
         kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 
@@ -50,7 +49,6 @@ android {
     }
 }
 
-// 👇 注意：dependencies 必须在 android { ... } 之外、单独一个顶层块
 dependencies {
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
