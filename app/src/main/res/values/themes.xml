@@ -1,6 +1,10 @@
-
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.TodoAI" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+    <!-- Compose 下直接用 DayNight；去掉 M2 已删除的 colorPrimaryVariant -->
+    <style name="Theme.TodoAI" parent="Theme.Material3.DayNight">
+        <!-- 如需自定义状态栏颜色，可直接设透明或引用 colorPrimary -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <!-- 或者：
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+        -->
     </style>
 </resources>
