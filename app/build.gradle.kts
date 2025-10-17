@@ -10,7 +10,19 @@ android {
     namespace = "com.example.todoai"
     compileSdk = 34
     defaultConfig { applicationId = "com.example.todoai"; minSdk = 24; targetSdk = 34; versionCode = 2; versionName = "1.1.0-m2"; vectorDrawables { useSupportLibrary = true } }
-    buildTypes { release { isMinifyEnabled = false; proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro") } getByName("debug") { applicationIdSuffix = ".debug"; versionNameSuffix = "-debug" } }
+    
+    getByName("release") {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
+    }
     buildFeatures { compose = true; buildConfig = true }
     composeOptions { kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get() }
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
