@@ -38,7 +38,7 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
 
         val url = "$baseUrl/v1/chat/completions"
 
-        // 用 buildString 纯手拼 JSON，避免三引号/模板混用带来的编译歧义
+        // 纯手拼 JSON，所有引号/反斜杠均为 ASCII 并已转义
         val payload = buildString {
             append("{\"model\":\"")
             append(prefs.model)
@@ -62,7 +62,7 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
                 throw IllegalStateException("HTTP ${resp.code}: ${resp.message}")
             }
             val body = resp.body?.string().orEmpty()
-            // 极简提取 content（演示用；生产建议 JSON 解析）
+            // 极简提取（演示用，生产建议用 JSON 解析）
             val text = body
                 .substringAfter("\"content\":\"", missingDelimiterValue = "")
                 .substringBefore("\"")
