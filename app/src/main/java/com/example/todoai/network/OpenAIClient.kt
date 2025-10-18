@@ -38,6 +38,7 @@ class OpenAIClient(private val cfg: OpenAIConfig) {
                     .header("Authorization", "Bearer ${cfg.apiKey}")
                     .header("Content-Type", "application/json")
                 cfg.gatewayBasic?.takeIf { it.isNotBlank() }?.let {
+                    // 你的网关需要 Basic，则这里会自动加头
                     rb.header("Proxy-Authorization", "Basic $it")
                 }
                 chain.proceed(rb.build())
@@ -63,6 +64,20 @@ class OpenAIClient(private val cfg: OpenAIConfig) {
         b.build()
     }
 
+    /** 网关连通性测试：GET {baseUrl}/ping */
+    suspend fun pingGateway(): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val url = cfg.baseUrl.trimEnd('/') + "/ping"
+            val req = Request.Builder().url(url).get().build()
+            client.newCall(req).execute().use { resp ->
+                val body = resp.body?.string() ?: ""
+                if (!resp.isSuccessful) return@withContext Result.failure(IllegalStateException("HTTP ${resp.code}: $body"))
+                Result.success(if (body.isBlank()) "OK" else body)
+            }
+        } catch (e: Exception) { Result.failure(e) }
+    }
+
+    /** 常规汇总（写“汇总记录”用） */
     suspend fun summarizeTodos(jsonPayload: String): Result<String> = withContext(Dispatchers.IO) {
         try {
             val url = "${cfg.baseUrl.trimEnd('/')}/v1/chat/completions"
@@ -76,17 +91,40 @@ class OpenAIClient(private val cfg: OpenAIConfig) {
                   "temperature": 0.2
                 }
             """.trimIndent()
-            val req = Request.Builder()
-                .url(url)
-                .post(body.toRequestBody("application/json".toMediaType()))
-                .build()
+            val req = Request.Builder().url(url).post(body.toRequestBody("application/json".toMediaType())).build()
             client.newCall(req).execute().use { resp ->
                 val respBody = resp.body?.string() ?: ""
                 if (!resp.isSuccessful) return@withContext Result.failure(IllegalStateException("HTTP ${resp.code}: $respBody"))
                 Result.success(respBody)
             }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        } catch (e: Exception) { Result.failure(e) }
+    }
+
+    /** 计划日历事件：要求模型输出 {title, description, startEpochMs, endEpochMs} 的 JSON */
+    suspend fun planCalendarEvent(todosJson: String): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val url = "${cfg.baseUrl.trimEnd('/')}/v1/chat/completions"
+            val prompt = """
+                你将收到一个 todos 列表(JSON)。请输出 JSON（不要解释文本），字段：
+                - title: string，适合写入系统日历的事件标题（不超过 30 字）。
+                - description: string，简洁摘要（不超过 200 字）。
+                - startEpochMs: number，建议的开始时间（毫秒时间戳）。
+                - endEpochMs: number，建议的结束时间（毫秒时间戳，>start）。
+                如果无法判断时间，请将 start/end 设为 0。
+                todos: $todosJson
+            """.trimIndent()
+            val body = """
+                {"model":"${cfg.model}","messages":[
+                  {"role":"system","content":"你是资深日程助理。"},
+                  {"role":"user","content": ${org.json.JSONObject.quote(prompt)} }
+                ],"temperature":0.2}
+            """.trimIndent()
+            val req = Request.Builder().url(url).post(body.toRequestBody("application/json".toMediaType())).build()
+            client.newCall(req).execute().use { resp ->
+                val respBody = resp.body?.string() ?: ""
+                if (!resp.isSuccessful) return@withContext Result.failure(IllegalStateException("HTTP ${resp.code}: $respBody"))
+                Result.success(respBody)
+            }
+        } catch (e: Exception) { Result.failure(e) }
     }
 }

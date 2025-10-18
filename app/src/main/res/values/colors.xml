@@ -1,0 +1,6 @@
+<resources>
+    <color name="widget_text_primary">#222222</color>
+    <color name="widget_text_muted">#666666</color>
+    <color name="widget_important">#D32F2F</color>
+    <color name="widget_normal">#222222</color>
+</resources>

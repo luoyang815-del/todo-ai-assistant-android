@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
 fun HomeScreen(vm: AppViewModel) {
     var title by remember { mutableStateOf("") }
     Column(Modifier.padding(16.dp)) {
-        Text(text = "代办清单（M3）", style = MaterialTheme.typography.titleLarge)
+        Text(text = "代办清单（M4）", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(12.dp))
         Row {
             OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("新增代办标题") }, modifier = Modifier.weight(1f))
@@ -69,15 +69,8 @@ fun HomeScreen(vm: AppViewModel) {
         }
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { vm.writeTodayToSystemCalendar() }) { Text("写入系统日历") }
+            Button(onClick = { vm.writeOptimizedCalendar() }) { Text("智能写入系统日历") }
             Button(onClick = { vm.summarizeAndStore() }) { Text("汇总到 OpenAI 并入库") }
-        }
-        Spacer(Modifier.height(12.dp))
-        val list = vm.todos.collectAsState(emptyList()).value
-        LazyColumn {
-            items(list) { t ->
-                ToDoItemRow(todo = t, onToggle = { vm.toggleDone(t.id) })
-            }
         }
     }
 }
