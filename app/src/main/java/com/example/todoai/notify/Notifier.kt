@@ -1,4 +1,4 @@
-package com.example.todoai.notify
+﻿package com.example.todoai.notify
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -14,7 +14,7 @@ class Notifier(private val ctx: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val mgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             mgr.createNotificationChannel(
-                NotificationChannel(channelId, "Todo AI 通知", NotificationManager.IMPORTANCE_DEFAULT)
+                NotificationChannel(channelId, "Todo AI 閫氱煡", NotificationManager.IMPORTANCE_DEFAULT)
             )
         }
     }
@@ -23,8 +23,8 @@ class Notifier(private val ctx: Context) {
         ensureChannel()
         val noti = NotificationCompat.Builder(ctx, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("AI 回复")
-            .setContentText(if (content.length > 30) content.take(30) + "…" else content)
+            .setContentTitle("AI 鍥炲")
+            .setContentText(if (content.length > 30) content.take(30) + "鈥? else content)
             .setStyle(NotificationCompat.BigTextStyle().bigText(content))
             .setAutoCancel(true)
             .build()
@@ -43,3 +43,4 @@ class Notifier(private val ctx: Context) {
         NotificationManagerCompat.from(ctx).notify(1002, noti)
     }
 }
+

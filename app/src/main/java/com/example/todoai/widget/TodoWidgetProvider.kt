@@ -1,4 +1,4 @@
-package com.example.todoai.widget
+﻿package com.example.todoai.widget
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
@@ -36,15 +36,16 @@ class TodoWidgetProvider : AppWidgetProvider() {
             val normals = all.filter { !it.important }.take(10)
 
             val rv = RemoteViews(context.packageName, R.layout.widget_todo)
-            rv.setTextViewText(R.id.summary, "总数：" + all.size + "，重要：" + important.size)
+            rv.setTextViewText(R.id.summary, "鎬绘暟锛? + all.size + "锛岄噸瑕侊細" + important.size)
 
-            val importantText = if (important.isEmpty()) "（无）" else important.joinToString("\n") { "• " + it.title }
-            val normalText = if (normals.isEmpty()) "（无）" else normals.joinToString("\n") { "• " + it.title }
+            val importantText = if (important.isEmpty()) "锛堟棤锛? else important.joinToString("\n") { "鈥?" + it.title }
+            val normalText = if (normals.isEmpty()) "锛堟棤锛? else normals.joinToString("\n") { "鈥?" + it.title }
 
-            rv.setTextViewText(R.id.importantList, "重要代办：\n" + importantText)
-            rv.setTextViewText(R.id.topList, "前10条：\n" + normalText)
+            rv.setTextViewText(R.id.importantList, "閲嶈浠ｅ姙锛歕n" + importantText)
+            rv.setTextViewText(R.id.topList, "鍓?0鏉★細\n" + normalText)
 
             appWidgetIds.forEach { id -> appWidgetManager.updateAppWidget(id, rv) }
         }
     }
 }
+

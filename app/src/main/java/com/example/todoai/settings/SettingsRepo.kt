@@ -1,4 +1,4 @@
-package com.example.todoai.settings
+﻿package com.example.todoai.settings
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -57,3 +57,4 @@ class SettingsRepo(private val context: Context) {
     return "{"+parts.joinToString(",")+"}"
   }
 }
+

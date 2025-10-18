@@ -1,4 +1,4 @@
-package com.example.todoai.todo
+﻿package com.example.todoai.todo
 
 import android.content.Context
 import org.json.JSONArray
@@ -34,3 +34,4 @@ class TodoRepository(ctx: Context) {
         sp.edit().putString("items", arr.toString()).apply()
     }
 }
+

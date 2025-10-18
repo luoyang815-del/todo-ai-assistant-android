@@ -1,4 +1,4 @@
-
+﻿
 package com.example.todoai
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,3 +11,4 @@ class MainActivity : ComponentActivity() {
   }
 }
 @Composable fun Greeting() { Text("Todo AI Assistant (fixed)") }
+

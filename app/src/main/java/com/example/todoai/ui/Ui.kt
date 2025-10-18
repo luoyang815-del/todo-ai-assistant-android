@@ -1,4 +1,4 @@
-package com.example.todoai.ui
+﻿package com.example.todoai.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,14 +22,14 @@ fun Ui(repo: TodoRepository, ai: OpenAIClient, modifier: Modifier = Modifier) {
         OutlinedTextField(
             value = input,
             onValueChange = { input = it },
-            label = { Text("输入代办或向 AI 询问（点击下方按钮发送）") },
+            label = { Text("杈撳叆浠ｅ姙鎴栧悜 AI 璇㈤棶锛堢偣鍑讳笅鏂规寜閽彂閫侊級") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
         Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             Row {
                 Checkbox(checked = important, onCheckedChange = { important = it })
-                Text("标记为重要")
+                Text("鏍囪涓洪噸瑕?)
             }
             Button(onClick = {
                 val text = input.text.trim()
@@ -38,32 +38,33 @@ fun Ui(repo: TodoRepository, ai: OpenAIClient, modifier: Modifier = Modifier) {
                     items = repo.list()
                     input = TextFieldValue("")
                 }
-            }) { Text("添加代办") }
+            }) { Text("娣诲姞浠ｅ姙") }
         }
         Row(Modifier.padding(top = 8.dp)) {
             Button(onClick = {
-                val q = input.text.trim().ifEmpty { "请帮我优化今天的代办清单排期。" }
-                try { aiReply = ai.chat(q) } catch (e: Exception) { aiReply = "请求失败：" + e.message }
-            }) { Text("发送到 OpenAI") }
+                val q = input.text.trim().ifEmpty { "璇峰府鎴戜紭鍖栦粖澶╃殑浠ｅ姙娓呭崟鎺掓湡銆? }
+                try { aiReply = ai.chat(q) } catch (e: Exception) { aiReply = "璇锋眰澶辫触锛? + e.message }
+            }) { Text("鍙戦€佸埌 OpenAI") }
         }
         if (aiReply.isNotBlank()) {
-            Text("AI 回复：", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 12.dp))
+            Text("AI 鍥炲锛?, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 12.dp))
             Text(aiReply, modifier = Modifier.padding(top = 4.dp))
         }
         Divider(Modifier.padding(vertical = 12.dp))
-        Text("清单（重要全部 + 普通前 10 条）", style = MaterialTheme.typography.titleMedium)
+        Text("娓呭崟锛堥噸瑕佸叏閮?+ 鏅€氬墠 10 鏉★級", style = MaterialTheme.typography.titleMedium)
 
         val importantList = items.filter { it.important }
         val normalList = items.filter { !it.important }.take(10)
 
         LazyColumn(Modifier.fillMaxWidth().padding(top = 8.dp)) {
             if (importantList.isNotEmpty()) {
-                item { Text("重要（" + importantList.size + "）", color = MaterialTheme.colorScheme.error) }
-                items(importantList) { it -> Text("• " + it.title) }
+                item { Text("閲嶈锛? + importantList.size + "锛?, color = MaterialTheme.colorScheme.error) }
+                items(importantList) { it -> Text("鈥?" + it.title) }
             }
             item { Spacer(Modifier.height(8.dp)) }
-            item { Text("普通（最多展示 10 条）") }
-            items(normalList) { it -> Text("• " + it.title) }
+            item { Text("鏅€氾紙鏈€澶氬睍绀?10 鏉★級") }
+            items(normalList) { it -> Text("鈥?" + it.title) }
         }
     }
 }
+

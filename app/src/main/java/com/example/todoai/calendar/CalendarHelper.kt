@@ -1,4 +1,4 @@
-package com.example.todoai.calendar
+﻿package com.example.todoai.calendar
 import android.content.ContentValues
 import android.content.Context
 import android.provider.CalendarContract
@@ -16,3 +16,4 @@ object CalendarHelper {
     context.contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)?.lastPathSegment?.toLongOrNull()
   } catch (_: SecurityException) { null }
 }
+

@@ -1,4 +1,4 @@
-package com.example.todoaiassist.net
+﻿package com.example.todoaiassist.net
 
 import com.example.todoaiassist.data.Prefs
 import com.example.todoaiassist.notify.Notifier
@@ -57,7 +57,7 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
             val body = resp.body?.string().orEmpty()
             val text = body.substringAfter(""content":"", missingDelimiterValue = "").substringBefore(""").replace("\n", "
 ").replace("\"", """)
-            val finalText = if (text.isBlank()) "（AI 无回复内容）" else text
+            val finalText = if (text.isBlank()) "锛圓I 鏃犲洖澶嶅唴瀹癸級" else text
             notifier.notifyAIReply(finalText)
             return finalText
         }
@@ -68,3 +68,4 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
 ", "\n") + """
     }
 }
+

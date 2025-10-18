@@ -1,4 +1,4 @@
-package com.example.todoaiassist.net
+﻿package com.example.todoaiassist.net
 
 import com.example.todoaiassist.data.Prefs
 import com.example.todoaiassist.notify.Notifier
@@ -38,7 +38,7 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
 
         val url = "$baseUrl/v1/chat/completions"
 
-        // 纯手拼 JSON，全部 ASCII，引号/反斜杠均已转义，避免三引号/模板冲突
+        // 绾墜鎷?JSON锛堝叏 ASCII锛屽叏閮ㄦ纭浆涔夛級
         val payload = buildString {
             append("{\"model\":\"")
             append(prefs.model)
@@ -62,14 +62,13 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
                 throw IllegalStateException("HTTP ${resp.code}: ${resp.message}")
             }
             val body = resp.body?.string().orEmpty()
-            // 极简提取（演示用；生产建议用 JSON 解析）
-            val text = body
+            // 鏋佺畝鎻愬彇锛堟紨绀虹敤锛涘疄闄呭缓璁?JSON 瑙ｆ瀽锛?            val text = body
                 .substringAfter("\"content\":\"", missingDelimiterValue = "")
                 .substringBefore("\"")
                 .replace("\\n", "\n")
                 .replace("\\\"", "\"")
 
-            val finalText = if (text.isBlank()) "（AI 无回复内容）" else text
+            val finalText = if (text.isBlank()) "锛圓I 鏃犲洖澶嶅唴瀹癸級" else text
             notifier.notifyAIReply(finalText)
             return finalText
         }
@@ -82,3 +81,4 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
             .replace("\n", "\\n") + "\""
     }
 }
+

@@ -1,4 +1,4 @@
-package com.example.todoai.data
+﻿package com.example.todoai.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.Instant
@@ -23,3 +23,4 @@ data class Summary(
   val summaryMd: String,
   val createdAt: Long = Instant.now().toEpochMilli()
 )
+

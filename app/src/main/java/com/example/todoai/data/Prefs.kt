@@ -1,4 +1,4 @@
-package com.example.todoai.data
+﻿package com.example.todoai.data
 
 import android.content.Context
 import android.util.Base64
@@ -50,3 +50,4 @@ class Prefs(ctx: Context) {
         return "Basic $token"
     }
 }
+
