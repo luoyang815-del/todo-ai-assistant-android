@@ -1,83 +1,68 @@
-package com.example.todoai.network
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import okhttp3.Credentials
-import okhttp3.Interceptor
+package com.example.todoaiassist.net
+
+import com.example.todoaiassist.data.Prefs
+import com.example.todoaiassist.notify.Notifier
+import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.logging.HttpLoggingInterceptor
 import java.net.InetSocketAddress
 import java.net.Proxy
-import java.util.concurrent.TimeUnit
-data class OpenAIConfig(
-  val baseUrl:String, val apiKey:String, val model:String,
-  val proxyType:String="NONE", val proxyHost:String?=null, val proxyPort:Int?=None,
-  val proxyUser:String?=null, val proxyPass:String?=null, val gatewayBasic:String?=null,
-  val timeoutSec:Long=30
-)
-class OpenAIClient(private val cfg: OpenAIConfig) {
-  private val client: OkHttpClient by lazy {
-    val b = OkHttpClient.Builder()
-      .connectTimeout(cfg.timeoutSec, TimeUnit.SECONDS)
-      .readTimeout(cfg.timeoutSec, TimeUnit.SECONDS)
-      .writeTimeout(cfg.timeoutSec, TimeUnit.SECONDS)
-      .addInterceptor(Interceptor { chain ->
-        val rb = chain.request().newBuilder()
-          .header("Authorization","Bearer ${cfg.apiKey}")
-          .header("Content-Type","application/json")
-        cfg.gatewayBasic?.takeIf { it.isNotBlank() }?.let { rb.header("Proxy-Authorization","Basic $it") }
-        chain.proceed(rb.build())
-      }).addInterceptor(HttpLoggingInterceptor().apply{ level=HttpLoggingInterceptor.Level.BASIC })
-    if (cfg.proxyType!="NONE" && cfg.proxyHost!=null && cfg.proxyPort!=null) {
-      val type = when(cfg.proxyType){ "HTTP","HTTPS"-> Proxy.Type.HTTP; "SOCKS5"-> Proxy.Type.SOCKS; else-> Proxy.Type.DIRECT }
-      if (type!=Proxy.Type.DIRECT) {
-        b.proxy(Proxy(type, InetSocketAddress(cfg.proxyHost, cfg.proxyPort)))
-        if (!cfg.proxyUser.isNullOrBlank()) {
-          b.proxyAuthenticator { _, resp ->
-            val cred = Credentials.basic(cfg.proxyUser, cfg.proxyPass ?: "")
-            resp.request.newBuilder().header("Proxy-Authorization", cred).build()
-          }
+
+class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
+    private fun buildClient(): OkHttpClient {
+        val builder = OkHttpClient.Builder()
+            .callTimeout(java.time.Duration.ofSeconds(60))
+            .connectTimeout(java.time.Duration.ofSeconds(30))
+            .readTimeout(java.time.Duration.ofSeconds(60))
+            .writeTimeout(java.time.Duration.ofSeconds(60))
+
+        when (prefs.proxyType) {
+            "http" -> builder.proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(prefs.proxyHost, prefs.proxyPort)))
+            "https" -> builder.proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(prefs.proxyHost, prefs.proxyPort)))
+            "socks" -> builder.proxy(Proxy(Proxy.Type.SOCKS, InetSocketAddress(prefs.proxyHost, prefs.proxyPort)))
         }
-      }
+        return builder.build()
     }
-    b.build()
-  }
-  suspend fun pingGateway(): Result<String> = withContext(Dispatchers.IO) {
-    try {
-      val url = cfg.baseUrl.trimEnd('/') + "/ping"
-      val req = Request.Builder().url(url).get().build()
-      client.newCall(req).execute().use { r ->
-        val body = r.body?.string() ?: ""
-        if (!r.isSuccessful) return@withContext Result.failure(IllegalStateException("HTTP ${r.code}: "+body))
-        Result.success(if (body.isBlank()) "OK" else body)
-      }
-    } catch (e:Exception) { Result.failure(e) }
-  }
-  suspend fun summarizeTodos(jsonPayload:String): Result<String> = withContext(Dispatchers.IO) {
-    try {
-      val url = "${cfg.baseUrl.trimEnd('/')}/v1/chat/completions"
-      val body = "{"model":"${cfg.model}","messages":[{"role":"system","content":"你是执行助理，擅长GTD与周报总结。输出Markdown和简要清单。"},{"role":"user","content": "+jsonPayload+"}],"temperature":0.2}"
-      val req = Request.Builder().url(url).post(body.toRequestBody("application/json".toMediaType())).build()
-      client.newCall(req).execute().use { r ->
-        val text = r.body?.string() ?: ""
-        if (!r.isSuccessful) return@withContext Result.failure(IllegalStateException("HTTP ${r.code}: "+text))
-        Result.success(text)
-      }
-    } catch(e:Exception){ Result.failure(e) }
-  }
-  suspend fun planCalendarEvent(todosJson:String): Result<String> = withContext(Dispatchers.IO) {
-    try {
-      val url = "${cfg.baseUrl.trimEnd('/')}/v1/chat/completions"
-      val prompt = "请把 todos 优化为日历事件(JSON，包含 title, description, startEpochMs, endEpochMs)。todos: " + todosJson
-      val body = "{"model":"${cfg.model}","messages":[{"role":"system","content":"你是资深日程助理。"},{"role":"user","content": " + org.json.JSONObject.quote(prompt) + "}],"temperature":0.2}"
-      val req = Request.Builder().url(url).post(body.toRequestBody("application/json".toMediaType())).build()
-      client.newCall(req).execute().use { r ->
-        val text = r.body?.string() ?: ""
-        if (!r.isSuccessful) return@withContext Result.failure(IllegalStateException("HTTP ${r.code}: "+text))
-        Result.success(text)
-      }
-    } catch(e:Exception){ Result.failure(e) }
-  }
+
+    fun chat(prompt: String): String {
+        val client = buildClient()
+        val baseUrl = if (prefs.gatewayEnabled && prefs.gatewayBaseUrl.isNotBlank())
+            prefs.gatewayBaseUrl.trimEnd('/')
+        else
+            "https://api.openai.com"
+
+        val url = "$baseUrl/v1/chat/completions"
+
+        val payload = buildString {
+            append("{\"model\":\"")
+            append(prefs.model)
+            append("\",\"messages\":[{\"role\":\"user\",\"content\":")
+            append(jsonString(prompt))
+            append("}],\"temperature\":0.2}")
+        }
+
+        val reqBuilder = Request.Builder()
+            .url(url)
+            .post(payload.toRequestBody("application/json".toMediaType()))
+
+        if (!prefs.gatewayEnabled) {
+            reqBuilder.addHeader("Authorization", "Bearer " + prefs.openaiApiKey)
+        } else {
+            prefs.basicAuthHeader()?.let { reqBuilder.addHeader("Authorization", it) }
+        }
+
+        client.newCall(reqBuilder.build()).execute().use { resp ->
+            if (!resp.isSuccessful) throw IllegalStateException("HTTP " + resp.code + ": " + resp.message)
+            val body = resp.body?.string().orEmpty()
+            val text = body.substringAfter("\"content\":\"").substringBefore("\"")
+                .replace("\\n", "\n").replace("\\\"", "\"")
+            val finalText = if (text.isBlank()) "（AI 无回复内容）" else text
+            notifier.notifyAIReply(finalText)
+            return finalText
+        }
+    }
+
+    private fun jsonString(s: String): String {
+        return "\"" + s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n") + "\""
+    }
 }
