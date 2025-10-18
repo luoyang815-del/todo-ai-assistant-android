@@ -98,6 +98,7 @@ fun SettingsScreen(context: Context) {
     val repo = remember { SettingsRepo(context) }
     val scope = rememberCoroutineScope()
 
+    // 这几个变量必须先定义，后面 collect 才不会 “Unresolved reference”
     var baseUrl by remember { mutableStateOf("") }
     var apiKey by remember { mutableStateOf("") }
     var model by remember { mutableStateOf("gpt-4.1-mini") }
@@ -106,6 +107,7 @@ fun SettingsScreen(context: Context) {
     var yaml by remember { mutableStateOf("") }
     var toast by remember { mutableStateOf("") }
 
+    // 用 LaunchedEffect 收敛 DataStore 值
     LaunchedEffect(Unit) { repo.baseUrl.collect { baseUrl = it } }
     LaunchedEffect(Unit) { repo.apiKey.collect { apiKey = it } }
     LaunchedEffect(Unit) { repo.model.collect { model = it } }
@@ -114,11 +116,21 @@ fun SettingsScreen(context: Context) {
 
     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text("OpenAI / 网关 / 代理设置", style = MaterialTheme.typography.titleLarge)
-        OutlinedTextField(value = baseUrl, onValueChange = { baseUrl = it }, label = { Text("Base URL（可填网关）") }, singleLine = true)
-        OutlinedTextField(value = apiKey, onValueChange = { apiKey = it }, label = { Text("API Key") }, singleLine = true, visualTransformation = PasswordVisualTransformation())
-        OutlinedTextField(value = model, onValueChange = { model = it }, label = { Text("Model（gpt-4.1-mini 等）") }, singleLine = true)
-        OutlinedTextField(value = proxyJson, onValueChange = { proxyJson = it }, label = { Text("代理 JSON（{\"type\":\"HTTP\",\"host\":\"127.0.0.1\",\"port\":7890}）") }, singleLine = true)
-        OutlinedTextField(value = gatewayBasic, onValueChange = { gatewayBasic = it }, label = { Text("网关 Basic（base64(user:pass)）") }, singleLine = true)
+
+        OutlinedTextField(value = baseUrl, onValueChange = { baseUrl = it },
+            label = { Text("Base URL（可填网关）") }, singleLine = true)
+
+        OutlinedTextField(value = apiKey, onValueChange = { apiKey = it },
+            label = { Text("API Key") }, singleLine = true, visualTransformation = PasswordVisualTransformation())
+
+        OutlinedTextField(value = model, onValueChange = { model = it },
+            label = { Text("Model（如 gpt-4.1-mini）") }, singleLine = true)
+
+        OutlinedTextField(value = proxyJson, onValueChange = { proxyJson = it },
+            label = { Text("代理 JSON（{\"type\":\"HTTP\",\"host\":\"127.0.0.1\",\"port\":7890}）") }, singleLine = true)
+
+        OutlinedTextField(value = gatewayBasic, onValueChange = { gatewayBasic = it },
+            label = { Text("网关 Basic（base64(user:pass)）") }, singleLine = true)
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = {
@@ -127,14 +139,18 @@ fun SettingsScreen(context: Context) {
                     toast = "已保存"
                 }
             }) { Text("保存") }
+
             Button(onClick = {
-                toast = if (baseUrl.isNotBlank() && apiKey.isNotBlank()) "基本检查通过（实际请求看“汇总”）" else "请填写 baseUrl 与 apiKey"
+                toast = if (baseUrl.isNotBlank() && apiKey.isNotBlank())
+                    "基本检查通过（实际请求看“汇总”）" else "请填写 baseUrl 与 apiKey"
             }) { Text("连通性测试") }
         }
 
         Divider()
         Text("导入 YAML（可含 openai/proxy/gateway）")
-        OutlinedTextField(value = yaml, onValueChange = { yaml = it }, label = { Text("粘贴 YAML 配置") }, minLines = 4)
+        OutlinedTextField(value = yaml, onValueChange = { yaml = it },
+            label = { Text("粘贴 YAML 配置") }, minLines = 4)
+
         Button(onClick = {
             scope.launch {
                 try {
@@ -151,6 +167,7 @@ fun SettingsScreen(context: Context) {
         }
     }
 }
+
 
 @Composable
 fun SummaryScreen(vm: AppViewModel) {
