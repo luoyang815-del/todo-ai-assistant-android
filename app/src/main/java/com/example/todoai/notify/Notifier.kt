@@ -13,9 +13,12 @@ class Notifier(private val ctx: Context) {
     private fun ensureChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val mgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            mgr.createNotificationChannel(
-                NotificationChannel(channelId, "Todo AI 閫氱煡", NotificationManager.IMPORTANCE_DEFAULT)
+            val channel = NotificationChannel(
+                channelId,
+                "Todo AI 通知",
+                NotificationManager.IMPORTANCE_DEFAULT
             )
+            mgr.createNotificationChannel(channel)
         }
     }
 
@@ -23,24 +26,11 @@ class Notifier(private val ctx: Context) {
         ensureChannel()
         val noti = NotificationCompat.Builder(ctx, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("AI 鍥炲")
-            .setContentText(if (content.length > 30) content.take(30) + "鈥? else content)
+            .setContentTitle("AI 回复")
+            .setContentText(if (content.length > 30) content.take(30) + "..." else content)
             .setStyle(NotificationCompat.BigTextStyle().bigText(content))
             .setAutoCancel(true)
             .build()
         NotificationManagerCompat.from(ctx).notify(1001, noti)
     }
-
-    fun notifyTodo(title: String, content: String) {
-        ensureChannel()
-        val noti = NotificationCompat.Builder(ctx, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle(title)
-            .setContentText(content)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(content))
-            .setAutoCancel(true)
-            .build()
-        NotificationManagerCompat.from(ctx).notify(1002, noti)
-    }
 }
-
