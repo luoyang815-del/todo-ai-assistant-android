@@ -1,7 +1,7 @@
-package com.example.todoai.network
+package com.example.todoaiassist.net
 
-import com.example.todoai.data.Prefs
-import com.example.todoai.notify.Notifier
+import com.example.todoaiassist.data.Prefs
+import com.example.todoaiassist.notify.Notifier
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -19,8 +19,12 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
             .writeTimeout(java.time.Duration.ofSeconds(60))
 
         when (prefs.proxyType.lowercase()) {
-            "http", "https" -> builder.proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(prefs.proxyHost, prefs.proxyPort)))
-            "socks" -> builder.proxy(Proxy(Proxy.Type.SOCKS, InetSocketAddress(prefs.proxyHost, prefs.proxyPort)))
+            "http", "https" -> builder.proxy(
+                Proxy(Proxy.Type.HTTP, InetSocketAddress(prefs.proxyHost, prefs.proxyPort))
+            )
+            "socks" -> builder.proxy(
+                Proxy(Proxy.Type.SOCKS, InetSocketAddress(prefs.proxyHost, prefs.proxyPort))
+            )
         }
         return builder.build()
     }
@@ -34,6 +38,7 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
 
         val url = "$baseUrl/v1/chat/completions"
 
+        // 用 buildString 纯手拼 JSON，避免三引号/模板混用带来的编译歧义
         val payload = buildString {
             append("{\"model\":\"")
             append(prefs.model)
@@ -53,12 +58,17 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
         }
 
         client.newCall(reqBuilder.build()).execute().use { resp ->
-            if (!resp.isSuccessful) throw IllegalStateException("HTTP ${resp.code}: ${resp.message}")
+            if (!resp.isSuccessful) {
+                throw IllegalStateException("HTTP ${resp.code}: ${resp.message}")
+            }
             val body = resp.body?.string().orEmpty()
-            val text = body.substringAfter("\"content\":\"", missingDelimiterValue = "")
+            // 极简提取 content（演示用；生产建议 JSON 解析）
+            val text = body
+                .substringAfter("\"content\":\"", missingDelimiterValue = "")
                 .substringBefore("\"")
                 .replace("\\n", "\n")
                 .replace("\\\"", "\"")
+
             val finalText = if (text.isBlank()) "（AI 无回复内容）" else text
             notifier.notifyAIReply(finalText)
             return finalText
@@ -66,7 +76,8 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
     }
 
     private fun jsonString(s: String): String {
-        return "\"" + s.replace("\\", "\\\\")
+        return "\"" + s
+            .replace("\\", "\\\\")
             .replace("\"", "\\\"")
             .replace("\n", "\\n") + "\""
     }
