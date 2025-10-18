@@ -1,4 +1,3 @@
-
 package com.example.todoai.settings
 
 import android.content.Context
@@ -23,7 +22,7 @@ class SettingsRepo(private val context: Context) {
     val baseUrl: Flow<String> = context.dataStore.data.map { it[Keys.OPENAI_BASE_URL] ?: "https://api.openai.com" }
     val apiKey: Flow<String> = context.dataStore.data.map { it[Keys.OPENAI_API_KEY] ?: "" }
     val model: Flow<String> = context.dataStore.data.map { it[Keys.OPENAI_MODEL] ?: "gpt-4.1-mini" }
-    val proxyJson: Flow<String> = context.dataStore.data.map { it[Keys.PROXY_JSON] ?: "{"type":"NONE"}" }
+    val proxyJson: Flow<String> = context.dataStore.data.map { it[Keys.PROXY_JSON] ?: "{\"type\":\"NONE\"}" }
     val gatewayBasic: Flow<String> = context.dataStore.data.map { it[Keys.GATEWAY_BASIC] ?: "" }
 
     suspend fun save(baseUrl: String, apiKey: String, model: String, proxyJson: String, gatewayBasic: String) {
@@ -45,12 +44,12 @@ class SettingsRepo(private val context: Context) {
             (openai["base_url"] as? String) ?: "https://api.openai.com",
             (openai["api_key"] as? String) ?: "",
             (openai["model"] as? String) ?: "gpt-4.1-mini",
-            buildJson(proxy),
+            buildProxyJson(proxy),
             (gateway["basic"] as? String) ?: ""
         )
     }
 
-    private fun buildJson(proxy: Map<String, Any?>): String {
+    private fun buildProxyJson(proxy: Map<String, Any?>): String {
         fun anyToInt(x: Any?): Int? = when (x) {
             null -> null
             is Number -> x.toInt()
@@ -62,12 +61,14 @@ class SettingsRepo(private val context: Context) {
         val port = anyToInt(proxy["port"])
         val user = proxy["auth_user"]?.toString()
         val pass = proxy["auth_pass"]?.toString()
+
         val parts = mutableListOf<String>()
-        parts += ""type":"${type}""
-        host?.let { parts += ""host":"${it}"" }
-        port?.let { parts += ""port":${port}" }
-        user?.let { parts += ""authUser":"${user}"" }
-        pass?.let { parts += ""authPass":"${pass}"" }
+        parts += "\"type\":\"$type\""
+        host?.let { parts += "\"host\":\"$it\"" }
+        port?.let { parts += "\"port\":$port" }
+        user?.let { parts += "\"authUser\":\"$user\"" }
+        pass?.let { parts += "\"authPass\":\"$pass\"" }
+
         return "{${parts.joinToString(",")}}"
     }
 }

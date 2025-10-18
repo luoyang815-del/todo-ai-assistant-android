@@ -1,4 +1,3 @@
-
 package com.example.todoai
 
 import android.Manifest
@@ -18,20 +17,23 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.todoai.ui.AppViewModel
-import com.example.todoai.ui.ToDoItemRow
 import com.example.todoai.ui.SettingsScreen
 import com.example.todoai.ui.SummaryScreen
+import com.example.todoai.ui.ToDoItemRow
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val requestPerms = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { }
-
         setContent {
             MaterialTheme {
                 val vm: AppViewModel = viewModel(factory = AppViewModel.factory(applicationContext))
                 LaunchedEffect(Unit) {
-                    requestPerms.launch(arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR, Manifest.permission.POST_NOTIFICATIONS))
+                    requestPerms.launch(arrayOf(
+                        Manifest.permission.READ_CALENDAR,
+                        Manifest.permission.WRITE_CALENDAR,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ))
                 }
                 val nav = rememberNavController()
                 Scaffold(
@@ -45,7 +47,7 @@ class MainActivity : ComponentActivity() {
                 ) { pad ->
                     NavHost(navController = nav, startDestination = "home", modifier = Modifier.padding(pad)) {
                         composable("home") { HomeScreen(vm) }
-                        composable("settings") { SettingsScreen(context = this@MainActivity) }
+                        composable("settings") { SettingsScreen(this@MainActivity) }
                         composable("summary") { SummaryScreen(vm) }
                     }
                 }
@@ -58,7 +60,7 @@ class MainActivity : ComponentActivity() {
 fun HomeScreen(vm: AppViewModel) {
     var title by remember { mutableStateOf("") }
     Column(Modifier.padding(16.dp)) {
-        Text(text = "代办清单（M2）", style = MaterialTheme.typography.titleLarge)
+        Text(text = "代办清单（M3）", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(12.dp))
         Row {
             OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("新增代办标题") }, modifier = Modifier.weight(1f))
@@ -70,7 +72,7 @@ fun HomeScreen(vm: AppViewModel) {
             Button(onClick = { vm.writeTodayToSystemCalendar() }) { Text("写入系统日历") }
             Button(onClick = { vm.summarizeAndStore() }) { Text("汇总到 OpenAI 并入库") }
         }
-        Spacer(Modifier.height(12dp))
+        Spacer(Modifier.height(12.dp))
         val list = vm.todos.collectAsState(emptyList()).value
         LazyColumn {
             items(list) { t ->

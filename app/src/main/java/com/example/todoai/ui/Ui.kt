@@ -1,4 +1,3 @@
-
 package com.example.todoai.ui
 
 import android.app.Application
@@ -21,6 +20,8 @@ import java.util.UUID
 import androidx.compose.runtime.*
 import androidx.compose.material3.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -46,23 +47,18 @@ class AppViewModel(private val app: Application) : ViewModel() {
         val now = Instant.now().toEpochMilli()
         CalendarHelper.insertEvent(app, "今日代办（示例）", now, now + 60*60*1000, "由 Todo AI Assistant 写入", 1L)
     }
-
     fun summarizeAndStore() = viewModelScope.launch {
-        // collect settings
         val baseUrl = settings.baseUrl.first()
         val apiKey = settings.apiKey.first()
         val model = settings.model.first()
         val proxy = settings.proxyJson.first()
         val gateway = settings.gatewayBasic.first()
 
-        // parse proxy json (for demo, naive parse)
-        fun get(k: String): String? = """+k+"":"" to """  # dummy
-
-        val type = Regex(""type"\s*:\s*"([^"]+)"").find(proxy)?.groupValues?.get(1) ?: "NONE"
-        val host = Regex(""host"\s*:\s*"([^"]+)"").find(proxy)?.groupValues?.get(1)
-        val port = Regex(""port"\s*:\s*(\d+)").find(proxy)?.groupValues?.get(1)?.toIntOrNull()
-        val puser = Regex(""authUser"\s*:\s*"([^"]+)"").find(proxy)?.groupValues?.get(1)
-        val ppass = Regex(""authPass"\s*:\s*"([^"]+)"").find(proxy)?.groupValues?.get(1)
+        val type = Regex("\\\"type\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"").find(proxy)?.groupValues?.get(1) ?: "NONE"
+        val host = Regex("\\\"host\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"").find(proxy)?.groupValues?.get(1)
+        val port = Regex("\\\"port\\\"\\s*:\\s*(\\d+)").find(proxy)?.groupValues?.get(1)?.toIntOrNull()
+        val puser = Regex("\\\"authUser\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"").find(proxy)?.groupValues?.get(1)
+        val ppass = Regex("\\\"authPass\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"").find(proxy)?.groupValues?.get(1)
 
         val client = OpenAIClient(OpenAIConfig(
             baseUrl = baseUrl, apiKey = apiKey, model = model,
@@ -70,18 +66,16 @@ class AppViewModel(private val app: Application) : ViewModel() {
             proxyUser = puser, proxyPass = ppass, gatewayBasic = gateway
         ))
 
-        // payload
-        val titles = todos.value.take(20).joinToString(","){ "{"title":""+it.title.replace(""","\"")+"","status":""+it.status+""}" }
-        val payload = "{"todos":["+titles+"]}"
-
+        val titles = todos.value.take(20).joinToString(",") {
+            "{\"title\":\"" + it.title.replace("\"","\\\"") + "\",\"status\":\"" + it.status + "\"}"
+        }
+        val payload = "{\"todos\":[$titles]}"
         val result = client.summarizeTodos(payload)
-        val body = result.getOrElse { err -> "# 汇总失败\n\n" + err.message }
-        val summary = Summary(id = UUID.randomUUID().toString(), promptUsed = "todos->summary", summaryMd = body ?: "空")
-        summaryDao.upsert(summary)
+        val body = result.getOrElse { err -> "# 汇总失败\\n\\n" + (err.message ?: "unknown") }
+        summaryDao.upsert(Summary(id = UUID.randomUUID().toString(), promptUsed = "todos->summary", summaryMd = body))
     }
-
     companion object {
-        fun factory(appContext: android.content.Context) = object : ViewModelProvider.Factory {
+        fun factory(appContext: Context) = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return AppViewModel(appContext.applicationContext as Application) as T
@@ -102,46 +96,38 @@ fun ToDoItemRow(todo: com.example.todoai.data.ToDo, onToggle: () -> Unit) {
 @Composable
 fun SettingsScreen(context: Context) {
     val repo = remember { SettingsRepo(context) }
+    val scope = rememberCoroutineScope()
+
     var baseUrl by remember { mutableStateOf("") }
     var apiKey by remember { mutableStateOf("") }
     var model by remember { mutableStateOf("gpt-4.1-mini") }
-    var proxyJson by remember { mutableStateOf("{"type":"NONE"}") }
+    var proxyJson by remember { mutableStateOf("{\"type\":\"NONE\"}") }
     var gatewayBasic by remember { mutableStateOf("") }
     var yaml by remember { mutableStateOf("") }
     var toast by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        repo.baseUrl.collect { baseUrl = it }
-    }
-    LaunchedEffect(Unit) {
-        repo.apiKey.collect { apiKey = it }
-    }
-    LaunchedEffect(Unit) {
-        repo.model.collect { model = it }
-    }
-    LaunchedEffect(Unit) {
-        repo.proxyJson.collect { proxyJson = it }
-    }
-    LaunchedEffect(Unit) {
-        repo.gatewayBasic.collect { gatewayBasic = it }
-    }
+    LaunchedEffect(Unit) { repo.baseUrl.collect { baseUrl = it } }
+    LaunchedEffect(Unit) { repo.apiKey.collect { apiKey = it } }
+    LaunchedEffect(Unit) { repo.model.collect { model = it } }
+    LaunchedEffect(Unit) { repo.proxyJson.collect { proxyJson = it } }
+    LaunchedEffect(Unit) { repo.gatewayBasic.collect { gatewayBasic = it } }
 
     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text("OpenAI / 网关 / 代理设置", style = MaterialTheme.typography.titleLarge)
         OutlinedTextField(value = baseUrl, onValueChange = { baseUrl = it }, label = { Text("Base URL（可填网关）") }, singleLine = true)
         OutlinedTextField(value = apiKey, onValueChange = { apiKey = it }, label = { Text("API Key") }, singleLine = true, visualTransformation = PasswordVisualTransformation())
-        OutlinedTextField(value = model, onValueChange = { model = it }, label = { Text("Model（可选：gpt-4.1-mini / gpt-4.1 / o4-mini 等）") }, singleLine = true)
-        OutlinedTextField(value = proxyJson, onValueChange = { proxyJson = it }, label = { Text("代理 JSON（示例：{"type":"HTTP","host":"127.0.0.1","port":7890}）") }, singleLine = true)
+        OutlinedTextField(value = model, onValueChange = { model = it }, label = { Text("Model（gpt-4.1-mini 等）") }, singleLine = true)
+        OutlinedTextField(value = proxyJson, onValueChange = { proxyJson = it }, label = { Text("代理 JSON（{\"type\":\"HTTP\",\"host\":\"127.0.0.1\",\"port\":7890}）") }, singleLine = true)
         OutlinedTextField(value = gatewayBasic, onValueChange = { gatewayBasic = it }, label = { Text("网关 Basic（base64(user:pass)）") }, singleLine = true)
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = {
-                // 保存
-                androidx.lifecycle.lifecycleScope.launchWhenStarted { repo.save(baseUrl, apiKey, model, proxyJson, gatewayBasic) }
-                toast = "已保存"
+                scope.launch {
+                    repo.save(baseUrl, apiKey, model, proxyJson, gatewayBasic)
+                    toast = "已保存"
+                }
             }) { Text("保存") }
             Button(onClick = {
-                // 测试：仅做 URL/Key 非空校验，真实接口可在汇总按钮触发
                 toast = if (baseUrl.isNotBlank() && apiKey.isNotBlank()) "基本检查通过（实际请求看“汇总”）" else "请填写 baseUrl 与 apiKey"
             }) { Text("连通性测试") }
         }
@@ -150,7 +136,7 @@ fun SettingsScreen(context: Context) {
         Text("导入 YAML（可含 openai/proxy/gateway）")
         OutlinedTextField(value = yaml, onValueChange = { yaml = it }, label = { Text("粘贴 YAML 配置") }, minLines = 4)
         Button(onClick = {
-            androidx.lifecycle.lifecycleScope.launchWhenStarted {
+            scope.launch {
                 try {
                     repo.importYaml(yaml)
                     toast = "YAML 导入成功"
@@ -175,12 +161,14 @@ fun SummaryScreen(vm: AppViewModel) {
         if (list.isEmpty()) {
             Text("暂无汇总记录")
         } else {
-            list.forEach {
-                Text("— ${it.createdAt}: ${it.promptUsed}")
-                Spacer(Modifier.height(4.dp))
-                Text(it.summaryMd.take(1000))
-                Spacer(Modifier.height(12.dp))
-                Divider()
+            LazyColumn {
+                items(list) {
+                    Text("— ${it.createdAt}: ${it.promptUsed}")
+                    Spacer(Modifier.height(4.dp))
+                    Text(it.summaryMd.take(1000))
+                    Spacer(Modifier.height(12.dp))
+                    Divider()
+                }
             }
         }
     }
