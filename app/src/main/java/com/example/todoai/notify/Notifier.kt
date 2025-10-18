@@ -1,12 +1,15 @@
 package com.example.todoai.notify
+
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+
 class Notifier(private val ctx: Context) {
     private val channelId = "todo_ai_assist"
+
     private fun ensureChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val mgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -15,6 +18,7 @@ class Notifier(private val ctx: Context) {
             )
         }
     }
+
     fun notifyAIReply(content: String) {
         ensureChannel()
         val noti = NotificationCompat.Builder(ctx, channelId)
@@ -25,5 +29,17 @@ class Notifier(private val ctx: Context) {
             .setAutoCancel(true)
             .build()
         NotificationManagerCompat.from(ctx).notify(1001, noti)
+    }
+
+    fun notifyTodo(title: String, content: String) {
+        ensureChannel()
+        val noti = NotificationCompat.Builder(ctx, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(content))
+            .setAutoCancel(true)
+            .build()
+        NotificationManagerCompat.from(ctx).notify(1002, noti)
     }
 }

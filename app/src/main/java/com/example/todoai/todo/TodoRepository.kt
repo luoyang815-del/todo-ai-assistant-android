@@ -1,10 +1,14 @@
 package com.example.todoai.todo
+
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
+
 data class TodoItem(val id: Long, val title: String, val important: Boolean = false)
+
 class TodoRepository(ctx: Context) {
     private val sp = ctx.getSharedPreferences("todo", Context.MODE_PRIVATE)
+
     fun list(): List<TodoItem> {
         val raw = sp.getString("items", "[]") ?: "[]"
         val arr = JSONArray(raw)
@@ -15,6 +19,7 @@ class TodoRepository(ctx: Context) {
             }
         }
     }
+
     fun add(title: String, important: Boolean) {
         val list = list().toMutableList()
         list.add(0, TodoItem(System.currentTimeMillis(), title, important))

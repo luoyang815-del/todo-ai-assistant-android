@@ -1,13 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:padding="8dp"
-    android:layout_width="match_parent" android:layout_height="wrap_content">
-    <TextView android:id="@+id/title" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="@string/widget_title" android:textStyle="bold" android:textSize="16sp"/>
-    <TextView android:id="@+id/summary" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="加载中…" android:textSize="14sp" android:paddingTop="4dp"/>
-    <TextView android:id="@+id/importantList" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="重要代办：" android:textSize="12sp" android:paddingTop="4dp"/>
-    <TextView android:id="@+id/topList" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="前10条：" android:textSize="12sp" android:paddingTop="2dp"/>
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/widget_title"
+        android:textStyle="bold"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="加载中…"
+        android:textSize="14sp"
+        android:paddingTop="4dp"/>
+
+    <TextView
+        android:id="@+id/importantList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="重要代办："
+        android:textSize="12sp"
+        android:paddingTop="4dp"/>
+
+    <TextView
+        android:id="@+id/topList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="前10条："
+        android:textSize="12sp"
+        android:paddingTop="2dp"/>
 </LinearLayout>
