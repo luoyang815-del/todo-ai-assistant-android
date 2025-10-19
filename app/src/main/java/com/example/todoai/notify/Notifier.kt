@@ -1,4 +1,4 @@
-package com.example.todoaiassist.notify
+package com.example.todoai.notify
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
