@@ -1,7 +1,7 @@
-package com.example.todoaiassist.net
+package com.example.todoai.net
 
-import com.example.todoaiassist.data.Prefs
-import com.example.todoaiassist.notify.Notifier
+import com.example.todoai.data.Prefs
+import com.example.todoai.notify.Notifier
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -53,7 +53,9 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
         if (!prefs.gatewayEnabled) {
             reqBuilder.addHeader("Authorization", "Bearer ${prefs.openaiApiKey}")
         } else {
-            prefs.basicAuthHeader()?.let { reqBuilder.addHeader("Authorization", it) }
+            prefs.basicAuthHeader()?.let { header ->
+                reqBuilder.addHeader("Authorization", header)
+            }
         }
 
         client.newCall(reqBuilder.build()).execute().use { resp ->
