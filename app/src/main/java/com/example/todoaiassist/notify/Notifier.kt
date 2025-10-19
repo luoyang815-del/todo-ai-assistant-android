@@ -13,7 +13,11 @@ class Notifier(private val ctx: Context) {
     private fun ensureChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val mgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val channel = NotificationChannel(channelId, "Todo AI Notification", NotificationManager.IMPORTANCE_DEFAULT)
+            val channel = NotificationChannel(
+                channelId,
+                "Todo AI Notification",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
             mgr.createNotificationChannel(channel)
         }
     }

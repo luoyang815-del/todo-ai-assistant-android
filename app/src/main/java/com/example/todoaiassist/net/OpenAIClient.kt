@@ -39,11 +39,11 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
         val url = "$baseUrl/v1/chat/completions"
 
         val payload = buildString {
-            append("{"model":"")
+            append("{\"model\":\"")
             append(prefs.model)
-            append("","messages":[{"role":"user","content":")
+            append("\",\"messages\":[{\"role\":\"user\",\"content\":")
             append(jsonString(prompt))
-            append("}],"temperature":0.2}")
+            append("}],\"temperature\":0.2}")
         }
 
         val reqBuilder = Request.Builder()
@@ -62,10 +62,10 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
             }
             val body = resp.body?.string().orEmpty()
             val text = body
-                .substringAfter(""content":"", "")
-                .substringBefore(""")
-                .replace("\n", "\n")
-                .replace("\"", """)
+                .substringAfter("\"content\":\"", "")
+                .substringBefore("\"")
+                .replace("\\n", "\n")
+                .replace("\\\"", "\"")
             val finalText = if (text.isBlank()) "(AI returned empty)" else text
             notifier.notifyAIReply(finalText)
             return finalText
@@ -73,10 +73,9 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
     }
 
     private fun jsonString(s: String): String {
-        return """ + s
-            .replace("\", "\\")
-            .replace(""", "\"")
-            .replace("
-", "\n") + """
+        return "\"" + s
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n") + "\""
     }
 }
