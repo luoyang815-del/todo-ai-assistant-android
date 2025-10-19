@@ -38,7 +38,6 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
 
         val url = "$baseUrl/v1/chat/completions"
 
-        // 全 ASCII 的 JSON 构造，避免三引号/模板冲突
         val payload = buildString {
             append("{\"model\":\"")
             append(prefs.model)
