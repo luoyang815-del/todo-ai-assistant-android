@@ -8,11 +8,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.example.todoaiassist.net.OpenAIClient
+import com.example.todoai.net.OpenAIClient
 import com.example.todoai.todo.TodoRepository
 
 @Composable
-fun Ui(repo: TodoRepository, ai: OpenAIClient, modifier: Modifier = Modifier) {
+fun Ui(
+    repo: TodoRepository,
+    ai: OpenAIClient,
+    modifier: Modifier = Modifier
+) {
     var input by remember { mutableStateOf(TextFieldValue("")) }
     var important by remember { mutableStateOf(false) }
     var aiReply by remember { mutableStateOf("") }
@@ -26,30 +30,39 @@ fun Ui(repo: TodoRepository, ai: OpenAIClient, modifier: Modifier = Modifier) {
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-        Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+
+        Row(
+            Modifier.padding(top = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Row {
                 Checkbox(checked = important, onCheckedChange = { important = it })
                 Text("标记为重要")
             }
-            Button(onClick = {
-                val text = input.text.trim()
-                if (text.isNotEmpty()) {
-                    repo.add(text, important)
-                    items = repo.list()
-                    input = TextFieldValue("")
+            Button(
+                onClick = {
+                    val text = input.text.trim()
+                    if (text.isNotEmpty()) {
+                        repo.add(text, important)
+                        items = repo.list()
+                        input = TextFieldValue("")
+                    }
                 }
-            }) { Text("添加代办") }
+            ) { Text("添加代办") }
         }
+
         Row(Modifier.padding(top = 8.dp)) {
             Button(onClick = {
                 val q = input.text.trim().ifEmpty { "请帮我优化今天的代办清单排期。" }
                 try { aiReply = ai.chat(q) } catch (e: Exception) { aiReply = "请求失败：" + (e.message ?: "") }
             }) { Text("发送到 OpenAI") }
         }
+
         if (aiReply.isNotBlank()) {
             Text("AI 回复：", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 12.dp))
             Text(aiReply, modifier = Modifier.padding(top = 4.dp))
         }
+
         Divider(Modifier.padding(vertical = 12.dp))
         Text("清单（重要全部 + 普通前 10 条）", style = MaterialTheme.typography.titleMedium)
 
