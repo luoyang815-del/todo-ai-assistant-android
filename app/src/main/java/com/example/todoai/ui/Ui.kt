@@ -1,15 +1,19 @@
 package com.example.todoai.ui
 
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.example.todoai.net.OpenAIClient
 import com.example.todoai.todo.TodoRepository
+import com.example.todoai.SettingsActivity
+import com.example.todoai.widget.TodoWidgetProvider
 
 @Composable
 fun Ui(
@@ -17,12 +21,18 @@ fun Ui(
     ai: OpenAIClient,
     modifier: Modifier = Modifier
 ) {
+    val ctx = LocalContext.current
     var input by remember { mutableStateOf(TextFieldValue("")) }
     var important by remember { mutableStateOf(false) }
     var aiReply by remember { mutableStateOf("") }
     var items by remember { mutableStateOf(repo.list()) }
 
     Column(modifier.padding(16.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Todo AI", style = MaterialTheme.typography.titleLarge)
+            TextButton(onClick = { ctx.startActivity(Intent(ctx, SettingsActivity::class.java)) }) { Text("设置") }
+        }
+
         OutlinedTextField(
             value = input,
             onValueChange = { input = it },
@@ -31,24 +41,20 @@ fun Ui(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Row(
-            Modifier.padding(top = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
+        Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             Row {
                 Checkbox(checked = important, onCheckedChange = { important = it })
                 Text("标记为重要")
             }
-            Button(
-                onClick = {
-                    val text = input.text.trim()
-                    if (text.isNotEmpty()) {
-                        repo.add(text, important)
-                        items = repo.list()
-                        input = TextFieldValue("")
-                    }
+            Button(onClick = {
+                val text = input.text.trim()
+                if (text.isNotEmpty()) {
+                    repo.add(text, important)
+                    items = repo.list()
+                    input = TextFieldValue("")
+                    try { TodoWidgetProvider.notifyAll(ctx) } catch (_: Exception) {}
                 }
-            ) { Text("添加代办") }
+            }) { Text("添加代办") }
         }
 
         Row(Modifier.padding(top = 8.dp)) {
