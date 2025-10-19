@@ -1,4 +1,4 @@
-﻿package com.example.todoaiassist.net
+package com.example.todoaiassist.net
 
 import com.example.todoaiassist.data.Prefs
 import com.example.todoaiassist.notify.Notifier
@@ -19,8 +19,12 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
             .writeTimeout(java.time.Duration.ofSeconds(60))
 
         when (prefs.proxyType.lowercase()) {
-            "http", "https" -> builder.proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(prefs.proxyHost, prefs.proxyPort)))
-            "socks" -> builder.proxy(Proxy(Proxy.Type.SOCKS, InetSocketAddress(prefs.proxyHost, prefs.proxyPort)))
+            "http", "https" -> builder.proxy(
+                Proxy(Proxy.Type.HTTP, InetSocketAddress(prefs.proxyHost, prefs.proxyPort))
+            )
+            "socks" -> builder.proxy(
+                Proxy(Proxy.Type.SOCKS, InetSocketAddress(prefs.proxyHost, prefs.proxyPort))
+            )
         }
         return builder.build()
     }
@@ -53,19 +57,26 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
         }
 
         client.newCall(reqBuilder.build()).execute().use { resp ->
-            if (!resp.isSuccessful) throw IllegalStateException("HTTP ${resp.code}: ${resp.message}")
+            if (!resp.isSuccessful) {
+                throw IllegalStateException("HTTP ${resp.code}: ${resp.message}")
+            }
             val body = resp.body?.string().orEmpty()
-            val text = body.substringAfter(""content":"", missingDelimiterValue = "").substringBefore(""").replace("\n", "
-").replace("\"", """)
-            val finalText = if (text.isBlank()) "锛圓I 鏃犲洖澶嶅唴瀹癸級" else text
+            val text = body
+                .substringAfter(""content":"", "")
+                .substringBefore(""")
+                .replace("\n", "\n")
+                .replace("\"", """)
+            val finalText = if (text.isBlank()) "(AI returned empty)" else text
             notifier.notifyAIReply(finalText)
             return finalText
         }
     }
 
     private fun jsonString(s: String): String {
-        return """ + s.replace("\", "\\").replace(""", "\"").replace("
+        return """ + s
+            .replace("\", "\\")
+            .replace(""", "\"")
+            .replace("
 ", "\n") + """
     }
 }
-

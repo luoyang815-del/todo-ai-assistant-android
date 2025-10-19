@@ -1,4 +1,4 @@
-﻿package com.example.todoaiassist.data
+package com.example.todoaiassist.data
 
 import android.content.Context
 import android.util.Base64
@@ -46,8 +46,7 @@ class Prefs(ctx: Context) {
         val user = gatewayUser
         val pass = gatewayPass
         if (user.isBlank() && pass.isBlank()) return null
-        val token = Base64.encodeToString("$user:$pass".toByteArray(), Base64.NO_WRAP)
+        val token = Base64.encodeToString(f"{user}:{pass}".toByteArray(), Base64.NO_WRAP)
         return "Basic $token"
     }
 }
-
