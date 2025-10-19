@@ -1,4 +1,4 @@
-﻿package com.example.todoaiassist.data
+package com.example.todoaiassist.data
 
 import android.content.Context
 import android.util.Base64

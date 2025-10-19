@@ -1,4 +1,4 @@
-﻿package com.example.todoaiassist.notify
+package com.example.todoaiassist.notify
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -15,7 +15,7 @@ class Notifier(private val ctx: Context) {
             val mgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val channel = NotificationChannel(
                 channelId,
-                "Todo AI 通知",
+                "Todo AI Notification",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
             mgr.createNotificationChannel(channel)
@@ -24,10 +24,11 @@ class Notifier(private val ctx: Context) {
 
     fun notifyAIReply(content: String) {
         ensureChannel()
+        val text = if (content.length > 30) content.substring(0, 30) + "..." else content
         val noti = NotificationCompat.Builder(ctx, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("AI 回复")
-            .setContentText(if (content.length > 30) content.take(30) + "..." else content)
+            .setContentTitle("AI Reply")
+            .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(content))
             .setAutoCancel(true)
             .build()

@@ -1,7 +1,7 @@
-﻿package com.example.todoaiassist.net
+package com.example.todoai.network
 
-import com.example.todoaiassist.data.Prefs
-import com.example.todoaiassist.notify.Notifier
+import com.example.todoai.data.Prefs
+import com.example.todoai.notify.Notifier
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -62,12 +62,11 @@ class OpenAIClient(private val prefs: Prefs, private val notifier: Notifier) {
             }
             val body = resp.body?.string().orEmpty()
             val text = body
-                .substringAfter("\"content\":\"", missingDelimiterValue = "")
+                .substringAfter("\"content\":\"", "")
                 .substringBefore("\"")
                 .replace("\\n", "\n")
                 .replace("\\\"", "\"")
-
-            val finalText = if (text.isBlank()) "（AI 无回复内容）" else text
+            val finalText = if (text.isBlank()) "(AI returned empty)" else text
             notifier.notifyAIReply(finalText)
             return finalText
         }
