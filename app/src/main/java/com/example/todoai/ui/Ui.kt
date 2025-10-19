@@ -10,9 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.example.todoai.SettingsActivity
 import com.example.todoai.net.OpenAIClient
 import com.example.todoai.todo.TodoRepository
-import com.example.todoai.SettingsActivity
 import com.example.todoai.widget.TodoWidgetProvider
 
 @Composable
@@ -30,7 +30,9 @@ fun Ui(
     Column(modifier.padding(16.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("Todo AI", style = MaterialTheme.typography.titleLarge)
-            TextButton(onClick = { ctx.startActivity(Intent(ctx, SettingsActivity::class.java)) }) { Text("设置") }
+            Button(onClick = { ctx.startActivity(Intent(ctx, SettingsActivity::class.java)) }) {
+                Text("设置")
+            }
         }
 
         OutlinedTextField(
@@ -38,7 +40,7 @@ fun Ui(
             onValueChange = { input = it },
             label = { Text("输入代办或向 AI 询问（点击下方按钮发送）") },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
         )
 
         Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {

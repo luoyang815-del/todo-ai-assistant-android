@@ -18,11 +18,7 @@ class SettingsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val prefs = Prefs(this)
         setContent {
-            MaterialTheme {
-                Surface {
-                    SettingsScreen(prefs)
-                }
-            }
+            MaterialTheme { Surface { SettingsScreen(prefs) } }
         }
     }
 }
@@ -42,17 +38,8 @@ fun SettingsScreen(prefs: Prefs) {
     Column(Modifier.padding(16.dp)) {
         Text("设置", style = MaterialTheme.typography.titleLarge)
 
-        OutlinedTextField(
-            value = apiKey, onValueChange = { apiKey = it },
-            label = { Text("OpenAI API Key") },
-            modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
-        )
-
-        OutlinedTextField(
-            value = model, onValueChange = { model = it },
-            label = { Text("Model（如 gpt-4o-mini）") },
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-        )
+        OutlinedTextField(apiKey, { apiKey = it }, label = { Text("OpenAI API Key") }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
+        OutlinedTextField(model, { model = it }, label = { Text("Model（如 gpt-4o-mini）") }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
 
         Row(Modifier.padding(top = 8.dp)) {
             Checkbox(checked = useGateway, onCheckedChange = { useGateway = it })
@@ -60,54 +47,25 @@ fun SettingsScreen(prefs: Prefs) {
         }
 
         if (useGateway) {
-            OutlinedTextField(
-                value = baseUrl, onValueChange = { baseUrl = it },
-                label = { Text("网关 Base URL") },
-                modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
-            )
-            OutlinedTextField(
-                value = user, onValueChange = { user = it },
-                label = { Text("网关用户名") },
-                modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
-            )
-            OutlinedTextField(
-                value = pass, onValueChange = { pass = it },
-                label = { Text("网关密码") },
-                modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
-            )
+            OutlinedTextField(baseUrl, { baseUrl = it }, label = { Text("网关 Base URL") }, modifier = Modifier.fillMaxWidth().padding(top = 4 dp))
+            OutlinedTextField(user, { user = it }, label = { Text("网关用户名") }, modifier = Modifier.fillMaxWidth().padding(top = 4 dp))
+            OutlinedTextField(pass, { pass = it }, label = { Text("网关密码") }, modifier = Modifier.fillMaxWidth().padding(top = 4 dp))
         }
 
-        OutlinedTextField(
-            value = proxyType, onValueChange = { proxyType = it },
-            label = { Text("代理类型（none/http/https/socks）") },
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-        )
-        OutlinedTextField(
-            value = proxyHost, onValueChange = { proxyHost = it },
-            label = { Text("代理主机") },
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
-        )
-        OutlinedTextField(
-            value = proxyPort, onValueChange = { proxyPort = it.filter { ch -> ch.isDigit() } },
-            label = { Text("代理端口") },
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
-        )
+        OutlinedTextField(proxyType, { proxyType = it }, label = { Text("代理类型（none/http/https/socks）") }, modifier = Modifier.fillMaxWidth().padding(top = 8 dp))
+        OutlinedTextField(proxyHost, { proxyHost = it }, label = { Text("代理主机") }, modifier = Modifier.fillMaxWidth().padding(top = 4 dp))
+        OutlinedTextField(proxyPort, { proxyPort = it.filter { ch -> ch.isDigit() } }, label = { Text("代理端口") }, modifier = Modifier.fillMaxWidth().padding(top = 4 dp))
 
-        Button(
-            onClick = {
-                prefs.openaiApiKey = apiKey
-                prefs.model = model
-                prefs.gatewayEnabled = useGateway
-                prefs.gatewayBaseUrl = baseUrl
-                prefs.gatewayUser = user
-                prefs.gatewayPass = pass
-                prefs.proxyType = proxyType
-                prefs.proxyHost = proxyHost
-                prefs.proxyPort = proxyPort.toIntOrNull() ?: 0
-            },
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text("保存")
-        }
+        Button(onClick = {
+            prefs.openaiApiKey = apiKey
+            prefs.model = model
+            prefs.gatewayEnabled = useGateway
+            prefs.gatewayBaseUrl = baseUrl
+            prefs.gatewayUser = user
+            prefs.gatewayPass = pass
+            prefs.proxyType = proxyType
+            prefs.proxyHost = proxyHost
+            prefs.proxyPort = proxyPort.toIntOrNull() ?: 0
+        }, modifier = Modifier.padding(top = 16.dp)) { Text("保存") }
     }
 }
