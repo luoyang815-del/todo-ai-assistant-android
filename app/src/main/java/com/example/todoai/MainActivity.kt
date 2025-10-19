@@ -15,11 +15,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Prepare dependencies
         val prefs = Prefs(this)
         val notifier = Notifier(this)
         val ai = OpenAIClient(prefs, notifier)
-        val repo = TodoRepository()
+        val repo = TodoRepository(this) // pass context
 
         setContent {
             MaterialTheme {
