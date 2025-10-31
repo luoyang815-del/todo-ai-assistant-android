@@ -1,1 +1,0 @@
-错误定位与修复说明：\n1) Kotlin 源码混入 Python 语法/中文引号导致 Unexpected tokens/Expecting ')'：已统一为标准 Kotlin 语法；OpenAIClient 使用 buildString 构造 JSON；全部英文标点。\n2) 包名冲突（todoai vs todoaiassist）和重复类：请删除 app/src/main/java/com/example/todoaiassist/ 目录；保留本包名结构。\n3) 资源缺失 @string/widget_title：已补 strings.xml。\n4) Compose 尺寸书写 8 dp：已统一 8.dp 并确保导入 dp。\n使用：解压到项目根目录覆盖 -> ./gradlew clean :app:assembleDebug\n
